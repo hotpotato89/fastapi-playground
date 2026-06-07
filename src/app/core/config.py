@@ -20,4 +20,4 @@ class Config(BaseSettings):
     model_config = {"env_file": ".env", "env_nested_delimiter": "__"}
 
 
-config = Config()  # type: ignore
+settings = Config()  # type: ignore
