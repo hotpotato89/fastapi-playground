@@ -6,6 +6,12 @@ class DBConfig(BaseModel):
     user: str
     password: str
     name: str
+    host: str = "localhost"
+    port: int = 5432
+
+    @property
+    def url(self) -> str:
+        return f"postgresql+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.name}"
 
 
 class Config(BaseSettings):
