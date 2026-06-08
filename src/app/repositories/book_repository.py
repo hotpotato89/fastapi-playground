@@ -9,7 +9,6 @@ class BookRepository:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    
     async def create(self, book_data: BookCreate) -> BookResponse:
         new_book = Book(**book_data.model_dump())
         self.session.add(new_book)
@@ -19,4 +18,4 @@ class BookRepository:
             return BookResponse.model_validate(new_book)
         except IntegrityError:
             await self.session.rollback()
-            raise BookAlreadyExistsError('Book already exists')
+            raise BookAlreadyExistsError("Book already exists")
