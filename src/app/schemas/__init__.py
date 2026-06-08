@@ -1,4 +1,4 @@
 from .base import BaseSchema
-from .book_schemas import BookResponse, CreateBook
+from .book_schemas import BookResponse, BookCreate
 
-__all__ = ["BaseSchema", "BookResponse", "CreateBook"]
+__all__ = ["BaseSchema", "BookResponse", "BookCreate"]

@@ -4,7 +4,7 @@ from .base import BaseSchema
 from pydantic import Field, field_validator
 
 
-class CreateBook(BaseSchema):
+class BookCreate(BaseSchema):
     title: str = Field(..., max_length=30, description="Book title")
     author: str = Field(..., max_length=60, description="Book author")
     description: str | None = Field(None, description="Book desctiption")
