@@ -18,4 +18,4 @@ class BookRepository:
             return BookResponse.model_validate(new_book)
         except IntegrityError:
             await self.session.rollback()
-            raise BookAlreadyExistsError("Book already exists")
+            raise BookAlreadyExistsError(f"Book with title {book_data.title} already exists")
