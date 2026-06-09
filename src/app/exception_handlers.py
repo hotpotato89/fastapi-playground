@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
-from src.app.exceptions import BookAlreadyExistsError, BookNotFoundError, ServerError
+from src.app.exceptions import BookAlreadyExistsError, BookNotFoundError, ServerError, UserAlreadyExistsError
 from sqlalchemy.exc import OperationalError
 
 
@@ -20,6 +20,15 @@ def register_exception_handlers(app: FastAPI) -> None:
     ) -> JSONResponse:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND, content={"detail": str(exc)}
+        )
+
+    @app.exception_handler(UserAlreadyExistsError)
+    async def user_exists_error_jandler(
+        request: Request, exc: UserAlreadyExistsError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT,
+            content={'detail': str(exc)}
         )
 
     # Database errors

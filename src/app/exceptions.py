@@ -6,7 +6,7 @@ class BookNotFoundError(Exception):
     pass
 
 
-class UserAlreadyExists(Exception):
+class UserAlreadyExistsError(Exception):
     pass
 
 

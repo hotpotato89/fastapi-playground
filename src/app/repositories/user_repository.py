@@ -1,6 +1,6 @@
 from sqlalchemy.exc import IntegrityError
 
-from src.app.exceptions import UserAlreadyExists
+from src.app.exceptions import UserAlreadyExistsError
 from src.app.schemas.user_schemas import UserResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.app.models import User
@@ -19,4 +19,4 @@ class UserRepository:
             return UserResponse.model_validate(new_user)
         except IntegrityError:
             await self.session.rollback()
-            raise UserAlreadyExists(f"User with username: {username} already exists")
+            raise UserAlreadyExistsError(f"User with username: {username} already exists")
