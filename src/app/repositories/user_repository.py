@@ -19,4 +19,6 @@ class UserRepository:
             return UserResponse.model_validate(new_user)
         except IntegrityError:
             await self.session.rollback()
-            raise UserAlreadyExistsError(f"User with username: {username} already exists")
+            raise UserAlreadyExistsError(
+                f"User with username: {username} already exists"
+            )

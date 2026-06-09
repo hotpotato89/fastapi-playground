@@ -1,6 +1,12 @@
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
-from src.app.exceptions import BookAlreadyExistsError, BookNotFoundError, ServerError, UserAlreadyExistsError
+from src.app.exceptions import (
+    BookAlreadyExistsError,
+    BookNotFoundError,
+    InvalidTokenError,
+    ServerError,
+    UserAlreadyExistsError,
+)
 from sqlalchemy.exc import OperationalError
 
 
@@ -23,12 +29,21 @@ def register_exception_handlers(app: FastAPI) -> None:
         )
 
     @app.exception_handler(UserAlreadyExistsError)
-    async def user_exists_error_jandler(
+    async def user_exists_error_handler(
         request: Request, exc: UserAlreadyExistsError
     ) -> JSONResponse:
         return JSONResponse(
-            status_code=status.HTTP_409_CONFLICT,
-            content={'detail': str(exc)}
+            status_code=status.HTTP_409_CONFLICT, content={"detail": str(exc)}
+        )
+
+    @app.exception_handler(InvalidTokenError)
+    async def token_error_handler(
+        request: Request, exc: InvalidTokenError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"detail": str(exc)},
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
     # Database errors

@@ -10,7 +10,7 @@ from src.app.services.user_service import UserService
 router = APIRouter(tags=["auth"], prefix="/auth")
 
 
-@router.post('/register', status_code=status.HTTP_201_CREATED)
+@router.post("/register", status_code=status.HTTP_201_CREATED)
 async def register_user(
     service: Annotated[UserService, Depends(get_user_service)], userdata: UserRegister
 ) -> UserResponse:

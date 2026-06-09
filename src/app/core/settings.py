@@ -12,10 +12,11 @@ class DBSettings(BaseModel):
     @property
     def url(self) -> str:
         return f"postgresql+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.name}"
-    
+
+
 class JWTSetings(BaseModel):
     secret_key: str
-    algorithm: str = 'HS256'
+    algorithm: str = "HS256"
 
 
 class Settings(BaseSettings):
