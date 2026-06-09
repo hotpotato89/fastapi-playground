@@ -46,14 +46,13 @@ def register_exception_handlers(app: FastAPI) -> None:
             content={"detail": str(exc)},
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     @app.exception_handler(UserUnactiveError)
     async def user_unactive_error_handler(
         request: Request, exc: UserUnactiveError
     ) -> JSONResponse:
         return JSONResponse(
-            status_code=status.HTTP_403_FORBIDDEN,
-            content={'detail': str(exc)}
+            status_code=status.HTTP_403_FORBIDDEN, content={"detail": str(exc)}
         )
 
     # Database errors

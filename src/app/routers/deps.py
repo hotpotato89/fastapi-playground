@@ -55,7 +55,7 @@ async def get_current_user(
     user_id = data.get("user_id")
     if not user_id:
         raise InvalidTokenError("Token has no user_id")
-    return await repo.get_by_id_for_jwt(user_id)
+    return await repo.get_by_id_for_auth(user_id)
 
 
 async def get_current_user_active(

@@ -22,5 +22,9 @@ class InvalidTokenError(Exception):
     pass
 
 
+class InvalidCredentialsError(Exception):
+    pass
+
+
 class ServerError(Exception):
     pass
