@@ -1,14 +1,12 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI
 
 from src.app.exception_hendlers import register_exception_handlers
-from src.app.routers import health_router, root_router, book_router
+from src.app.routers import root_router
 from src.app.core import lifespan
+from src.app.main_router import main_router
 
 app = FastAPI(title="FastAPI playground", lifespan=lifespan)
 register_exception_handlers(app)
-main_router = APIRouter(prefix="/api")
 
-main_router.include_router(health_router)
-main_router.include_router(book_router)
 app.include_router(root_router)
 app.include_router(main_router)
