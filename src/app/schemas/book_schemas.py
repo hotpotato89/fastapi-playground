@@ -9,7 +9,7 @@ class BookCreate(BaseSchema):
     title: str = Field(..., max_length=30, description="Book title")
     author: str = Field(..., max_length=60, description="Book author")
     description: Optional[str] = Field(None, description="Book desctiption")
-    genre: str = Field(..., description='Genre of book')
+    genre: str = Field(..., description="Genre of book")
 
     @field_validator("title", "author")
     @classmethod
@@ -34,7 +34,7 @@ class BookUpdate(BaseSchema):
     title: Optional[str] = Field(None, max_length=30, description="Book title")
     author: Optional[str] = Field(None, max_length=60, description="Book author")
     description: Optional[str] = Field(None, description="Book description")
-    genre: Optional[str] = Field(None, description='Genre of book')
+    genre: Optional[str] = Field(None, description="Genre of book")
 
     @field_validator("title", "author")
     @classmethod

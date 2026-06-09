@@ -1,5 +1,3 @@
-from typing import Optional
-
 from sqlalchemy import desc, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -29,10 +27,18 @@ class BookRepository:
                 f"Book with title {book_data.title} already exists"
             )
 
-    async def get_all(self, limit: int = 50, page: int = 1) -> list[BookResponse]:
+    async def get_all(
+        self, limit: int = 50, page: int = 1, genre: str | None = None, author: str | None = None
+    ) -> list[BookResponse]:
         offset = (page - 1) * limit
-        query = select(Book).order_by(desc(Book.created_at)).limit(limit).offset(offset)
-        result = await self.session.execute(query)
+        query = select(Book)
+        if genre:
+            query = query.where(Book.genre == genre)
+        if author:
+            query = query.where(Book.author == author)
+        result = await self.session.execute(
+            query.order_by(desc(Book.created_at)).limit(limit).offset(offset)
+        )
         books = result.scalars().all()
         return [BookResponse.model_validate(book) for book in books]
 
