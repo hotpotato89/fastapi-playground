@@ -1,6 +1,7 @@
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
-from src.app.exceptions import UserAlreadyExistsError
+from src.app.exceptions import UserAlreadyExistsError, UserNotFoundError
 from src.app.schemas.user_schemas import UserResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.app.models import User
@@ -22,3 +23,10 @@ class UserRepository:
             raise UserAlreadyExistsError(
                 f"User with username: {username} already exists"
             )
+
+    async def get_by_id_for_jwt(self, id: int) -> User:
+        result = await self.session.execute(select(User).where(User.id == id))
+        user = result.scalar_one_or_none()
+        if not user:
+            raise UserNotFoundError(f"User with ID {id} does not exist")
+        return user

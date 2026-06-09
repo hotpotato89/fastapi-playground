@@ -6,6 +6,14 @@ class BookNotFoundError(Exception):
     pass
 
 
+class UserNotFoundError(Exception):
+    pass
+
+
+class UserUnactiveError(Exception):
+    pass
+
+
 class UserAlreadyExistsError(Exception):
     pass
 
