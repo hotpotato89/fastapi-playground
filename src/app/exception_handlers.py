@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
-from src.app.exceptions import BookAlreadyExistsError, BookNotFoundError
+from src.app.exceptions import BookAlreadyExistsError, BookNotFoundError, ServerError
 from sqlalchemy.exc import OperationalError
 
 
@@ -25,10 +25,19 @@ def register_exception_handlers(app: FastAPI) -> None:
     # Database errors
 
     @app.exception_handler(OperationalError)
-    async def database_error_handler(
+    async def operationalerror_handler(
         request: Request, exc: OperationalError
     ) -> JSONResponse:
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"detail": str(exc)},
+        )
+
+    # Server errors
+
+    @app.exception_handler(ServerError)
+    async def servererror_handler(request: Request, exc: ServerError) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"detail": str(exc)},
         )

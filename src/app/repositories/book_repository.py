@@ -1,9 +1,13 @@
 from sqlalchemy import desc, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.app.exceptions import BookAlreadyExistsError, BookNotFoundError
+from src.app.exceptions import BookAlreadyExistsError, BookNotFoundError, ServerError
 from src.app.schemas import BookCreate, BookResponse
 from src.app.models import Book
+
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 
 class BookRepository:
@@ -36,3 +40,14 @@ class BookRepository:
         if not book:
             raise BookNotFoundError(f"Book with id {id} does not exist")
         return BookResponse.model_validate(book)
+
+    async def delete(self, id: int) -> None:
+        book = self.session.get(Book, id)
+        if not book:
+            raise BookNotFoundError(f"Book with ID {id} does not exist")
+        try:
+            await self.session.delete(book)
+            await self.session.commit()
+        except Exception as e:
+            logger.error("Database error", exc_info=e)
+            raise ServerError("Database error")

@@ -4,3 +4,7 @@ class BookAlreadyExistsError(Exception):
 
 class BookNotFoundError(Exception):
     pass
+
+
+class ServerError(Exception):
+    pass

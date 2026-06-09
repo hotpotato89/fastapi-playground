@@ -30,3 +30,11 @@ async def get_by_id(
     book_id: int = Path(..., ge=1, description="Book ID"),
 ) -> BookResponse:
     return await service.get_by_id(book_id)
+
+
+@router.delete("/{book_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_book(
+    service: Annotated[BookService, Depends(get_service)],
+    book_id: int = Path(..., ge=1, description="Book ID"),
+) -> None:
+    return await service.delete(book_id)

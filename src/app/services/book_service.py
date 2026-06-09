@@ -14,3 +14,6 @@ class BookService:
 
     async def get_by_id(self, id: int) -> BookResponse:
         return await self.repo.get_by_id(id)
+
+    async def delete(self, id: int) -> None:
+        return await self.repo.delete(id)
