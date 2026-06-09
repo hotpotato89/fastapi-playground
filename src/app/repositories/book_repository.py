@@ -1,7 +1,7 @@
 from sqlalchemy import desc, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.app.exceptions import BookAlreadyExistsError
+from src.app.exceptions import BookAlreadyExistsError, BookNotFoundError
 from src.app.schemas import BookCreate, BookResponse
 from src.app.models import Book
 
@@ -29,3 +29,10 @@ class BookRepository:
         result = await self.session.execute(query)
         books = result.scalars().all()
         return [BookResponse.model_validate(book) for book in books]
+
+    async def get_by_id(self, id: int) -> BookResponse:
+        result = await self.session.execute(select(Book).where(Book.id == id))
+        book = result.scalar_one_or_none()
+        if not book:
+            raise BookNotFoundError(f"Book with id {id} does not exist")
+        return BookResponse.model_validate(book)

@@ -11,3 +11,6 @@ class BookService:
 
     async def get_all(self, limit: int = 50, page: int = 1) -> list[BookResponse]:
         return await self.repo.get_all(limit, page)
+
+    async def get_by_id(self, id: int) -> BookResponse:
+        return await self.repo.get_by_id(id)
