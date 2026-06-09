@@ -6,7 +6,12 @@ from src.app.core import settings
 from src.app.exceptions import InvalidTokenError
 
 
-def encode_jwt(
+def create_access_token(user_id: int, username: str) -> str:
+    payload = {"sub": username, "user_id": user_id}
+    return _encode_jwt(payload)
+
+
+def _encode_jwt(
     data: dict[str, Any], expire_minute: int = 15, token_type: str = "access"
 ) -> str:
     to_encode = data.copy()
