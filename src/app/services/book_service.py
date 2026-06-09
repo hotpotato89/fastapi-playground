@@ -1,6 +1,7 @@
 from src.app.repositories import BookRepository
 from src.app.schemas import BookCreate, BookResponse
 
+
 class BookService:
     def __init__(self, repo: BookRepository) -> None:
         self.repo = repo
