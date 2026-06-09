@@ -1,3 +1,5 @@
+from typing import Optional
+
 from sqlalchemy import desc, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
