@@ -7,6 +7,8 @@ from src.app.models import Book
 
 from logging import getLogger
 
+from src.app.schemas.book_schemas import BookUpdate
+
 logger = getLogger(__name__)
 
 
@@ -23,9 +25,7 @@ class BookRepository:
             return BookResponse.model_validate(new_book)
         except IntegrityError:
             await self.session.rollback()
-            raise BookAlreadyExistsError(
-                f"Book with title {book_data.title} already exists"
-            )
+            raise BookAlreadyExistsError(f"Book with title {book_data.title} already exists")
 
     async def get_all(self, limit: int = 50, page: int = 1) -> list[BookResponse]:
         offset = (page - 1) * limit
@@ -51,3 +51,20 @@ class BookRepository:
         except Exception as e:
             logger.error("Database error", exc_info=e)
             raise ServerError("Database error")
+
+    async def update(self, id: int, newbook_data: BookUpdate) -> BookResponse:
+        book = await self.session.get(Book, id)
+        if not book:
+            raise BookNotFoundError(f'Book with ID {id} does not exist')
+        
+        update_data = newbook_data.model_dump(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(book, key, value)
+        
+        try:
+            await self.session.commit()
+            await self.session.refresh(book)
+            return BookResponse.model_validate(book)
+        except IntegrityError:
+            await self.session.rollback()
+            raise BookAlreadyExistsError(f"Book with title {newbook_data.title} already exists")

@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path, Query, status
 from src.app.routers.deps import get_service
-from src.app.schemas.book_schemas import BookCreate, BookResponse
+from src.app.schemas.book_schemas import BookCreate, BookResponse, BookUpdate
 from src.app.services.book_service import BookService
 
 router = APIRouter(tags=["book"], prefix="/book")
@@ -38,3 +38,12 @@ async def delete_book(
     book_id: int = Path(..., ge=1, description="Book ID"),
 ) -> None:
     return await service.delete(book_id)
+
+
+@router.patch('/{book_id}')
+async def update(
+        service: Annotated[BookService, Depends(get_service)],
+        newbook_data: BookUpdate,
+        book_id: int = Path(..., ge=1, description='Book ID')
+) -> BookResponse:
+    return await service.update(book_id, newbook_data)

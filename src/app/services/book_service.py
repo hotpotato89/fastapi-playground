@@ -1,5 +1,6 @@
 from src.app.repositories import BookRepository
 from src.app.schemas import BookCreate, BookResponse
+from src.app.schemas.book_schemas import BookUpdate
 
 
 class BookService:
@@ -17,3 +18,6 @@ class BookService:
 
     async def delete(self, id: int) -> None:
         return await self.repo.delete(id)
+
+    async def update(self, id: int, newbook_data: BookUpdate) -> BookResponse:
+        return await self.repo.update(id, newbook_data)
