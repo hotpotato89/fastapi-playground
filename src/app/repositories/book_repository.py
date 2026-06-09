@@ -2,12 +2,10 @@ from sqlalchemy import desc, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.app.exceptions import BookAlreadyExistsError, BookNotFoundError, ServerError
-from src.app.schemas import BookCreate, BookResponse
+from src.app.schemas import BookCreate, BookResponse, BookUpdate
 from src.app.models import Book
 
 from logging import getLogger
-
-from src.app.schemas.book_schemas import BookUpdate
 
 logger = getLogger(__name__)
 
@@ -59,7 +57,7 @@ class BookRepository:
         if not book:
             raise BookNotFoundError(f"Book with ID {id} does not exist")
 
-        update_data = newbook_data.model_dump(exclude_unset=True)
+        update_data = newbook_data.model_dump(exclude_unset=True, exclude_none=True)
         for key, value in update_data.items():
             setattr(book, key, value)
 
