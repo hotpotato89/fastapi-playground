@@ -40,10 +40,10 @@ async def delete_book(
     return await service.delete(book_id)
 
 
-@router.patch('/{book_id}')
+@router.patch("/{book_id}")
 async def update(
-        service: Annotated[BookService, Depends(get_service)],
-        newbook_data: BookUpdate,
-        book_id: int = Path(..., ge=1, description='Book ID')
+    service: Annotated[BookService, Depends(get_service)],
+    newbook_data: BookUpdate,
+    book_id: int = Path(..., ge=1, description="Book ID"),
 ) -> BookResponse:
     return await service.update(book_id, newbook_data)
