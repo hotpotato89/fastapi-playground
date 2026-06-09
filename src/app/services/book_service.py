@@ -11,7 +11,11 @@ class BookService:
         return await self.repo.create(book_data)
 
     async def get_all(
-        self, limit: int = 50, page: int = 1, genre: str | None = None, author: str | None = None
+        self,
+        limit: int = 50,
+        page: int = 1,
+        genre: str | None = None,
+        author: str | None = None,
     ) -> list[BookResponse]:
         fomatted_author = author.capitalize() if author else None
         return await self.repo.get_all(limit, page, genre, fomatted_author)

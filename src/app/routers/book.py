@@ -21,7 +21,7 @@ async def get_all(
     limit: int = Query(50, ge=1, le=50, description="Limit of count on one page"),
     page: int = Query(1, ge=1, description="Page number"),
     genre: str | None = Query(None, max_length=50, description="Genre filter"),
-    author: str | None = Query(None, max_length=60, description='Author filter')
+    author: str | None = Query(None, max_length=60, description="Author filter"),
 ) -> list[BookResponse]:
     return await service.get_all(limit, page, genre, author)
 

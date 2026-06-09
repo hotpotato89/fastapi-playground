@@ -28,7 +28,11 @@ class BookRepository:
             )
 
     async def get_all(
-        self, limit: int = 50, page: int = 1, genre: str | None = None, author: str | None = None
+        self,
+        limit: int = 50,
+        page: int = 1,
+        genre: str | None = None,
+        author: str | None = None,
     ) -> list[BookResponse]:
         offset = (page - 1) * limit
         query = select(Book)
