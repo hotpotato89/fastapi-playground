@@ -1,3 +1,4 @@
+from sqlalchemy import desc, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.app.exceptions import BookAlreadyExistsError
@@ -21,3 +22,10 @@ class BookRepository:
             raise BookAlreadyExistsError(
                 f"Book with title {book_data.title} already exists"
             )
+
+    async def get_all(self, limit: int = 50, page: int = 1) -> list[BookResponse]:
+        offset = (page - 1) * limit
+        query = select(Book).order_by(desc(Book.created_at)).limit(limit).offset(offset)
+        result = await self.session.execute(query)
+        books = result.scalars().all()
+        return [BookResponse.model_validate(book) for book in books]

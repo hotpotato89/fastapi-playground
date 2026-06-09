@@ -8,3 +8,6 @@ class BookService:
 
     async def create_book(self, book_data: BookCreate) -> BookResponse:
         return await self.repo.create(book_data)
+
+    async def get_all(self, limit: int = 50, page: int = 1) -> list[BookResponse]:
+        return await self.repo.get_all(limit, page)
