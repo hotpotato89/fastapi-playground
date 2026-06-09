@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from src.app.exception_hendlers import register_exception_handlers
+from src.app.exception_handlers import register_exception_handlers
 from src.app.routers import root_router
 from src.app.core import lifespan
 from src.app.main_router import main_router
