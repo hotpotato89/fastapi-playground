@@ -1,6 +1,6 @@
 from src.app.repositories.user_repository import UserRepository
 from src.app.schemas.user_schemas import UserRegister, UserResponse
-from src.app.utils.hashing import hash_password
+from src.app.utils.hash import hash_password
 
 
 class UserService:
