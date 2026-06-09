@@ -20,3 +20,5 @@ class Book(Base):
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
     )
+
+    genre: Mapped[str] = mapped_column(String(50), nullable=False)
