@@ -42,7 +42,7 @@ class BookRepository:
         return BookResponse.model_validate(book)
 
     async def delete(self, id: int) -> None:
-        book = self.session.get(Book, id)
+        book = await self.session.get(Book, id)
         if not book:
             raise BookNotFoundError(f"Book with ID {id} does not exist")
         try:
