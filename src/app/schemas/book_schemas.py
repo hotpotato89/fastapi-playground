@@ -7,11 +7,10 @@ from pydantic import Field, field_validator
 
 class BookCreate(BaseSchema):
     title: str = Field(..., max_length=30, description="Book title")
-    author: str = Field(..., max_length=60, description="Book author")
     description: Optional[str] = Field(None, description="Book desctiption")
     genre: str = Field(..., description="Genre of book")
 
-    @field_validator("title", "author")
+    @field_validator("title")
     @classmethod
     def not_empty(cls, v: str) -> str:
         if not v.strip():
@@ -24,7 +23,7 @@ class BookResponse(BaseSchema):
 
     id: int
     title: str
-    author: str
+    author_id: int
     description: Optional[str] = None
     created_at: datetime
     genre: str
@@ -32,11 +31,10 @@ class BookResponse(BaseSchema):
 
 class BookUpdate(BaseSchema):
     title: Optional[str] = Field(None, max_length=30, description="Book title")
-    author: Optional[str] = Field(None, max_length=60, description="Book author")
     description: Optional[str] = Field(None, description="Book description")
     genre: Optional[str] = Field(None, description="Genre of book")
 
-    @field_validator("title", "author")
+    @field_validator("title")
     @classmethod
     def not_empty(cls, v: Optional[str]):
         if v is not None:

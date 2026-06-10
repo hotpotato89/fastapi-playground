@@ -14,8 +14,8 @@ class BookRepository:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def create(self, book_data: BookCreate) -> BookResponse:
-        new_book = Book(**book_data.model_dump())
+    async def create(self, book_data: BookCreate, author_id: int) -> BookResponse:
+        new_book = Book(**book_data.model_dump(), author_id=author_id)
         self.session.add(new_book)
         try:
             await self.session.commit()
@@ -32,14 +32,14 @@ class BookRepository:
         limit: int = 50,
         page: int = 1,
         genre: str | None = None,
-        author: str | None = None,
+        author_id: int | None = None,
     ) -> list[BookResponse]:
         offset = (page - 1) * limit
         query = select(Book)
         if genre:
             query = query.where(Book.genre == genre)
-        if author:
-            query = query.where(Book.author == author)
+        if author_id:
+            query = query.where(Book.author_id == author_id)
         result = await self.session.execute(
             query.order_by(desc(Book.created_at)).limit(limit).offset(offset)
         )
