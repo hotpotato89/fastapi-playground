@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from src.app.exceptions import (
     BookAlreadyExistsError,
     BookNotFoundError,
+    InvalidCredentialsError,
     InvalidTokenError,
     ServerError,
     UserAlreadyExistsError,
@@ -53,6 +54,16 @@ def register_exception_handlers(app: FastAPI) -> None:
     ) -> JSONResponse:
         return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN, content={"detail": str(exc)}
+        )
+    
+
+    @app.exception_handler(InvalidCredentialsError)
+    async def invalid_credentials_error_handler(
+            request: Request, exc: InvalidCredentialsError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={'detail': str(exc)}
         )
 
     # Database errors

@@ -58,7 +58,7 @@ async def get_current_user(
     return await repo.get_by_id_for_auth(user_id)
 
 
-async def get_current_user_active(
+async def get_current_active_user(
     user_model: Annotated[User, Depends(get_current_user)],
 ) -> User:
     if not user_model.is_active:

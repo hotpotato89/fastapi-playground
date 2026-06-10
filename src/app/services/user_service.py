@@ -1,4 +1,5 @@
 from src.app.exceptions import InvalidCredentialsError
+from src.app.models import User
 from src.app.repositories.user_repository import UserRepository
 from src.app.schemas.user_schemas import UserLogin, UserRegister, UserResponse
 from src.app.utils.hash import hash_password, verify_password
@@ -21,3 +22,6 @@ class UserService:
         ):
             raise InvalidCredentialsError("Invalid password or login")
         return create_access_token(user.id, user.username)
+
+    async def get_me(self, user: User) -> UserResponse:
+        return UserResponse.model_validate(user)

@@ -2,7 +2,8 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 
-from src.app.routers.deps import get_user_service
+from src.app.models import User
+from src.app.routers.deps import get_current_active_user, get_user_service
 from src.app.schemas.user_schemas import UserLogin, UserRegister, UserResponse
 from src.app.services.user_service import UserService
 
@@ -23,3 +24,11 @@ async def login_user(
 ) -> dict[str, str]:
     token = await service.login_user(userdata)
     return {"access_token": token, "token_type": "Bearer"}
+
+
+@router.get("/me")
+async def get_me(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    service: Annotated[UserService, Depends(get_user_service)],
+) -> UserResponse:
+    return await service.get_me(current_user)
