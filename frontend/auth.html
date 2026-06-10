@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход - FastAPI Playground</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #3a3a3a 0%, #1a1a1a 100%);
+        }
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        .input-field {
+            width: 100%;
+            background: #3a3a3a;
+            border: 1px solid #4a4a4a;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            color: #e0e0e0;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        .text-primary {
+            color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-900">
+    <div class="min-h-screen flex">
+        <div class="hidden lg:flex lg:w-1/2 gradient-bg items-center justify-center">
+            <div class="text-white text-center p-12">
+                <h1 class="text-5xl font-bold mb-4">📚 FastAPI Playground</h1>
+                <p class="text-xl opacity-90">Добро пожаловать в библиотеку книг</p>
+            </div>
+        </div>
+        
+        <div class="w-full lg:w-1/2 flex items-center justify-center p-8">
+            <div class="max-w-md w-full">
+                <div class="bg-[#2d2d2d] rounded-2xl shadow-xl p-8">
+                    <div class="text-center mb-8">
+                        <div class="text-4xl mb-3">🔐</div>
+                        <h2 id="formTitle" class="text-2xl font-bold text-white">Вход в аккаунт</h2>
+                        <p id="formSubtitle" class="text-gray-400 mt-2">Войдите или создайте новый аккаунт</p>
+                    </div>
+                    
+                    <form id="authForm">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Имя пользователя</label>
+                            <input type="text" id="username" required class="input-field">
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Пароль</label>
+                            <input type="password" id="password" required class="input-field">
+                        </div>
+                        
+                        <button type="submit" id="submitBtn" class="btn-primary w-full">Войти</button>
+                    </form>
+                    
+                    <div class="mt-6 text-center">
+                        <p id="toggleText" class="text-gray-400">
+                            Нет аккаунта?
+                            <button type="button" id="toggleMode" class="text-primary font-semibold hover:underline">
+                                Зарегистрироваться
+                            </button>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api';
+        let isLoginMode = true;
+        
+        function updateUI() {
+            const formTitle = document.getElementById('formTitle');
+            const formSubtitle = document.getElementById('formSubtitle');
+            const submitBtn = document.getElementById('submitBtn');
+            const toggleText = document.getElementById('toggleText');
+            
+            if (isLoginMode) {
+                formTitle.textContent = 'Вход в аккаунт';
+                formSubtitle.textContent = 'Войдите в свой аккаунт';
+                submitBtn.textContent = 'Войти';
+                toggleText.innerHTML = 'Нет аккаунта? <button type="button" id="toggleMode" class="text-primary font-semibold hover:underline">Зарегистрироваться</button>';
+            } else {
+                formTitle.textContent = 'Регистрация';
+                formSubtitle.textContent = 'Создайте новый аккаунт';
+                submitBtn.textContent = 'Зарегистрироваться';
+                toggleText.innerHTML = 'Уже есть аккаунт? <button type="button" id="toggleMode" class="text-primary font-semibold hover:underline">Войти</button>';
+            }
+            
+            const newToggleBtn = document.getElementById('toggleMode');
+            if (newToggleBtn) {
+                newToggleBtn.addEventListener('click', toggleMode);
+            }
+        }
+        
+        function toggleMode() {
+            isLoginMode = !isLoginMode;
+            updateUI();
+        }
+        
+        async function handleSubmit(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (isLoginMode) {
+                // Логин
+                try {
+                    const response = await fetch(`${API_URL}/auth/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.status === 200 && data.access_token) {
+                        localStorage.setItem('access_token', data.access_token);
+                        window.location.href = '/books.html';
+                    } else {
+                        Swal.fire('Ошибка', data.detail || 'Неверный логин или пароль', 'error');
+                    }
+                } catch (error) {
+                    Swal.fire('Ошибка', 'Не удалось подключиться к серверу', 'error');
+                }
+            } else {
+                // Регистрация
+                try {
+                    const response = await fetch(`${API_URL}/auth/register`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
+                    
+                    if (response.status === 201) {
+                        // Регистрация успешна → переключаем на форму входа
+                        toggleMode();
+                        document.getElementById('password').value = '';
+                        Swal.fire('Успех', 'Регистрация прошла успешно. Теперь вы можете войти', 'success');
+                    } else if (response.status === 409) {
+                        Swal.fire('Ошибка', 'Пользователь с таким именем уже существует', 'error');
+                    } else {
+                        const data = await response.json();
+                        Swal.fire('Ошибка', data.detail || 'Не удалось зарегистрироваться', 'error');
+                    }
+                } catch (error) {
+                    Swal.fire('Ошибка', 'Не удалось подключиться к серверу', 'error');
+                }
+            }
+        }
+        
+        document.getElementById('authForm').addEventListener('submit', handleSubmit);
+        document.getElementById('toggleMode').addEventListener('click', toggleMode);
+        
+        if (localStorage.getItem('access_token')) {
+            window.location.href = '/books.html';
+        }
+    </script>
+</body>
+</html>

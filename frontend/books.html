@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Книги - FastAPI Playground</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+        .card {
+            background: #2d2d2d;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        .btn-secondary {
+            background: #4a4a4a;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-secondary:hover {
+            background: #5a5a5a;
+        }
+        .input-field {
+            width: 100%;
+            background: #3a3a3a;
+            border: 1px solid #4a4a4a;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            color: #e0e0e0;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        .nav-link {
+            color: #e0e0e0;
+            transition: color 0.2s;
+        }
+        .nav-link:hover {
+            color: #3b82f6;
+        }
+        .genre-tag {
+            padding: 0.25rem 0.75rem;
+            background: #3b82f6;
+            color: white;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: #2d2d2d;
+            border-radius: 1rem;
+            max-width: 28rem;
+            width: 90%;
+            padding: 1.5rem;
+        }
+        .loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1001;
+        }
+        .loading.active {
+            display: block;
+        }
+        .spinner {
+            background: #2d2d2d;
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="bg-[#2d2d2d] shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-8">
+                    <a href="/" class="text-xl font-bold text-white">📚 Playground</a>
+                    <a href="/books.html" class="text-blue-500 font-semibold">Книги</a>
+                    <a href="/auth.html" class="nav-link" id="authLink">Войти</a>
+                    <a href="/profile.html" class="nav-link hidden" id="profileLink">Профиль</a>
+                </div>
+                <div id="userInfo" class="flex items-center space-x-4">
+                    <span id="username" class="text-sm text-gray-400 hidden"></span>
+                    <button id="logoutBtn" class="btn-danger hidden">Выйти</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-white">📖 Библиотека книг</h1>
+            <button id="createBookBtn" class="btn-primary hidden">+ Добавить книгу</button>
+        </div>
+
+        <div class="bg-[#2d2d2d] p-6 rounded-xl mb-8">
+            <div class="grid md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Жанр</label>
+                    <select id="genreFilter" class="input-field">
+                        <option value="">Все жанры</option>
+                        <option value="fantasy">Фэнтези</option>
+                        <option value="adventure">Приключения</option>
+                        <option value="drama">Драма</option>
+                        <option value="science">Наука</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Автор ID</label>
+                    <input type="number" id="authorFilter" placeholder="ID автора" class="input-field">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">На странице</label>
+                    <select id="limitFilter" class="input-field">
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="50" selected>50</option>
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button id="applyFilters" class="btn-primary w-full">Применить</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="booksGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+        <div class="flex justify-center items-center space-x-4 mt-8">
+            <button id="prevPage" class="btn-secondary disabled:opacity-50" disabled>← Назад</button>
+            <span id="pageInfo" class="text-gray-400">Страница 1</span>
+            <button id="nextPage" class="btn-secondary">Вперед →</button>
+        </div>
+    </div>
+
+    <div id="bookModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle" class="text-2xl font-bold text-white mb-4">Добавить книгу</h2>
+            <form id="bookForm">
+                <input type="hidden" id="bookId">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Название *</label>
+                    <input type="text" id="title" required class="input-field">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Жанр *</label>
+                    <select id="genre" required class="input-field">
+                        <option value="">Выберите жанр</option>
+                        <option value="fantasy">Фэнтези</option>
+                        <option value="adventure">Приключения</option>
+                        <option value="drama">Драма</option>
+                        <option value="science">Наука</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Описание</label>
+                    <textarea id="description" rows="3" class="input-field"></textarea>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal()" class="btn-secondary">Отмена</button>
+                    <button type="submit" class="btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="loading" class="loading">
+        <div class="spinner">Загрузка...</div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api';
+        let currentPage = 1;
+        let currentLimit = 50;
+        let currentGenre = '';
+        let currentAuthor = '';
+        
+        function getToken() {
+            return localStorage.getItem('access_token');
+        }
+        
+        function isAuthenticated() {
+            return !!getToken();
+        }
+        
+        function showLoading() {
+            document.getElementById('loading').classList.add('active');
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('active');
+        }
+        
+        async function fetchBooks() {
+            showLoading();
+            const params = new URLSearchParams({
+                page: currentPage,
+                limit: currentLimit
+            });
+            if (currentGenre) params.append('genre', currentGenre);
+            if (currentAuthor) params.append('author_id', currentAuthor);
+            
+            try {
+                const response = await fetch(`${API_URL}/book/?${params}`);
+                const books = await response.json();
+                renderBooks(books);
+                updatePagination();
+            } catch (error) {
+                Swal.fire('Ошибка', 'Не удалось загрузить книги', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        function renderBooks(books) {
+            const grid = document.getElementById('booksGrid');
+            if (!books.length) {
+                grid.innerHTML = '<div class="col-span-full text-center text-gray-500 py-12">📭 Книг не найдено</div>';
+                return;
+            }
+            
+            grid.innerHTML = books.map(book => `
+                <div class="card p-6">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="text-xl font-bold text-white">${escapeHtml(book.title)}</h3>
+                        <span class="genre-tag">${escapeHtml(book.genre)}</span>
+                    </div>
+                    ${book.description ? `<p class="text-gray-400 mb-4">${escapeHtml(book.description)}</p>` : ''}
+                    <div class="flex justify-between items-center text-sm text-gray-500">
+                        <span>👤 Автор ID: ${book.author_id}</span>
+                        <span>📅 ${new Date(book.created_at).toLocaleDateString('ru-RU')}</span>
+                    </div>
+                    ${isAuthenticated() ? `
+                        <div class="flex justify-end space-x-2 mt-4 pt-3 border-t border-gray-700">
+                            <button onclick="editBook(${book.id}, '${escapeHtml(book.title)}', '${escapeHtml(book.genre)}', ${book.description ? `'${escapeHtml(book.description)}'` : null})" class="text-blue-400 hover:text-blue-300">✏️ Редактировать</button>
+                            <button onclick="deleteBook(${book.id})" class="text-red-400 hover:text-red-300">🗑️ Удалить</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+        
+        async function createBook(data) {
+            showLoading();
+            try {
+                const response = await fetch(`${API_URL}/book/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getToken()}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.status === 201) {
+                    Swal.fire('Успех', 'Книга успешно создана', 'success');
+                    closeModal();
+                    fetchBooks();
+                } else if (response.status === 409) {
+                    Swal.fire('Ошибка', 'Книга с таким названием уже существует', 'error');
+                } else {
+                    Swal.fire('Ошибка', 'Не удалось создать книгу', 'error');
+                }
+            } catch (error) {
+                Swal.fire('Ошибка', 'Проверьте подключение к серверу', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        async function updateBook(id, data) {
+            showLoading();
+            try {
+                const response = await fetch(`${API_URL}/book/${id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getToken()}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.status === 200) {
+                    Swal.fire('Успех', 'Книга обновлена', 'success');
+                    closeModal();
+                    fetchBooks();
+                } else {
+                    Swal.fire('Ошибка', 'Не удалось обновить книгу', 'error');
+                }
+            } catch (error) {
+                Swal.fire('Ошибка', 'Проверьте подключение к серверу', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        async function deleteBook(id) {
+            const result = await Swal.fire({
+                title: 'Вы уверены?',
+                text: 'Это действие нельзя отменить',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                confirmButtonText: 'Да, удалить',
+                cancelButtonText: 'Отмена'
+            });
+            
+            if (result.isConfirmed) {
+                showLoading();
+                try {
+                    const response = await fetch(`${API_URL}/book/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${getToken()}` }
+                    });
+                    
+                    if (response.status === 204) {
+                        Swal.fire('Удалено', 'Книга удалена', 'success');
+                        fetchBooks();
+                    } else if (response.status === 403) {
+                        Swal.fire('Ошибка', 'Вы не можете удалить эту книгу', 'error');
+                    } else {
+                        Swal.fire('Ошибка', 'Не удалось удалить книгу', 'error');
+                    }
+                } catch (error) {
+                    Swal.fire('Ошибка', 'Проверьте подключение к серверу', 'error');
+                } finally {
+                    hideLoading();
+                }
+            }
+        }
+        
+        function editBook(id, title, genre, description) {
+            document.getElementById('modalTitle').textContent = 'Редактировать книгу';
+            document.getElementById('bookId').value = id;
+            document.getElementById('title').value = title;
+            document.getElementById('genre').value = genre;
+            document.getElementById('description').value = description || '';
+            document.getElementById('bookModal').classList.add('active');
+        }
+        
+        function closeModal() {
+            document.getElementById('bookModal').classList.remove('active');
+            document.getElementById('bookForm').reset();
+            document.getElementById('bookId').value = '';
+            document.getElementById('modalTitle').textContent = 'Добавить книгу';
+        }
+        
+        function updatePagination() {
+            document.getElementById('pageInfo').textContent = `Страница ${currentPage}`;
+            document.getElementById('prevPage').disabled = currentPage === 1;
+        }
+        
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+        
+        function updateNav() {
+            const authLink = document.getElementById('authLink');
+            const profileLink = document.getElementById('profileLink');
+            const usernameSpan = document.getElementById('username');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const createBtn = document.getElementById('createBookBtn');
+            
+            if (isAuthenticated()) {
+                authLink.classList.add('hidden');
+                profileLink.classList.remove('hidden');
+                usernameSpan.classList.remove('hidden');
+                logoutBtn.classList.remove('hidden');
+                createBtn.classList.remove('hidden');
+                
+                fetch(`${API_URL}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    usernameSpan.textContent = data.username;
+                })
+                .catch(() => {});
+            } else {
+                authLink.classList.remove('hidden');
+                profileLink.classList.add('hidden');
+                usernameSpan.classList.add('hidden');
+                logoutBtn.classList.add('hidden');
+                createBtn.classList.add('hidden');
+            }
+        }
+        
+        document.getElementById('logoutBtn')?.addEventListener('click', () => {
+            localStorage.removeItem('access_token');
+            updateNav();
+            window.location.reload();
+        });
+        
+        document.getElementById('applyFilters').addEventListener('click', () => {
+            currentGenre = document.getElementById('genreFilter').value;
+            currentAuthor = document.getElementById('authorFilter').value;
+            currentLimit = parseInt(document.getElementById('limitFilter').value);
+            currentPage = 1;
+            fetchBooks();
+        });
+        
+        document.getElementById('prevPage').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                fetchBooks();
+            }
+        });
+        
+        document.getElementById('nextPage').addEventListener('click', () => {
+            currentPage++;
+            fetchBooks();
+        });
+        
+        document.getElementById('createBookBtn').addEventListener('click', () => {
+            document.getElementById('bookModal').classList.add('active');
+        });
+        
+        document.getElementById('bookForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = document.getElementById('bookId').value;
+            const data = {
+                title: document.getElementById('title').value,
+                genre: document.getElementById('genre').value,
+                description: document.getElementById('description').value || null
+            };
+            
+            if (id) {
+                updateBook(parseInt(id), data);
+            } else {
+                createBook(data);
+            }
+        });
+        
+        updateNav();
+        fetchBooks();
+    </script>
+</body>
+</html>
