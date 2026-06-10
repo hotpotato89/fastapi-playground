@@ -5,6 +5,7 @@ from src.app.exceptions import (
     BookNotFoundError,
     InvalidCredentialsError,
     InvalidTokenError,
+    PermissionDeniedError,
     ServerError,
     UserAlreadyExistsError,
     UserUnactiveError,
@@ -63,6 +64,16 @@ def register_exception_handlers(app: FastAPI) -> None:
         return JSONResponse(
             status_code=status.HTTP_401_UNAUTHORIZED, content={"detail": str(exc)}
         )
+
+    @app.exception_handler(PermissionDeniedError)
+    async def permission_denied_error_handler(
+        request: Request, exc: PermissionDeniedError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={'detail': str(exc)}
+        )
+
 
     # Database errors
 

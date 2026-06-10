@@ -28,3 +28,7 @@ class InvalidCredentialsError(Exception):
 
 class ServerError(Exception):
     pass
+
+
+class PermissionDeniedError(Exception):
+    pass

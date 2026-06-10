@@ -1,3 +1,4 @@
+from src.app.exceptions import PermissionDeniedError
 from src.app.repositories import BookRepository
 from src.app.schemas import BookCreate, BookResponse
 from src.app.schemas.book_schemas import BookUpdate
@@ -22,8 +23,16 @@ class BookService:
     async def get_by_id(self, id: int) -> BookResponse:
         return await self.repo.get_by_id(id)
 
-    async def delete(self, id: int) -> None:
+    async def delete(self, id: int, user_id: int) -> None:
+        book = await self.repo.get_by_id(id)
+        if book.author_id != user_id:
+            raise PermissionDeniedError("You cannot delete another's book")
         return await self.repo.delete(id)
 
-    async def update(self, id: int, newbook_data: BookUpdate) -> BookResponse:
+    async def update(
+        self, user_id: int, id: int, newbook_data: BookUpdate
+    ) -> BookResponse:
+        book = await self.repo.get_by_id(id)
+        if book.author_id != user_id:
+            raise PermissionDeniedError("You cannot edit another's book")
         return await self.repo.update(id, newbook_data)

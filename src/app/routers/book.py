@@ -11,7 +11,9 @@ router = APIRouter(tags=["book"], prefix="/book")
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_book(
-    service: Annotated[BookService, Depends(get_book_service)], upload_data: BookCreate, current_user: Annotated[User, Depends(get_current_active_user)]
+    service: Annotated[BookService, Depends(get_book_service)],
+    upload_data: BookCreate,
+    current_user: Annotated[User, Depends(get_current_active_user)],
 ) -> BookResponse:
     return await service.create_book(upload_data, current_user.id)
 
@@ -38,15 +40,19 @@ async def get_by_id(
 @router.delete("/{book_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_book(
     service: Annotated[BookService, Depends(get_book_service)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     book_id: int = Path(..., ge=1, description="Book ID"),
 ) -> None:
-    return await service.delete(book_id)
+    return await service.delete(book_id, current_user.id)
 
 
 @router.patch("/{book_id}")
 async def update(
     service: Annotated[BookService, Depends(get_book_service)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     newbook_data: BookUpdate,
     book_id: int = Path(..., ge=1, description="Book ID"),
 ) -> BookResponse:
-    return await service.update(book_id, newbook_data)
+    return await service.update(
+        user_id=current_user.id, id=book_id, newbook_data=newbook_data
+    )

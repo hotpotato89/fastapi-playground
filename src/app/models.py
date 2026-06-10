@@ -14,7 +14,7 @@ class Book(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
     title: Mapped[str] = mapped_column(String(30), nullable=False, unique=True)
-    author_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
+    author_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     description: Mapped[str | None] = mapped_column(Text(), nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(
