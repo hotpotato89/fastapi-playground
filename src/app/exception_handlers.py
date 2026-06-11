@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from src.app.exceptions import (
     BookAlreadyExistsError,
     BookNotFoundError,
+    DatabaseError,
     InvalidCredentialsError,
     InvalidTokenError,
     PermissionDeniedError,
@@ -82,6 +83,16 @@ def register_exception_handlers(app: FastAPI) -> None:
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             content={"detail": str(exc)},
+        )
+    
+
+    @app.exception_handler(DatabaseError)
+    async def database_error_handler(
+        request: Request, exc: DatabaseError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={'detail': str(exc)}
         )
 
     # Server errors
