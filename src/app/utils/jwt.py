@@ -11,6 +11,11 @@ def create_access_token(user_id: int, username: str) -> str:
     return _encode_jwt(payload)
 
 
+def create_refresh_token(user_id: int, username: str) -> str:
+    payload = {"sub": username, "user_id": user_id}
+    return _encode_jwt(payload, 60 * 24 * 7, "refresh")
+
+
 def _encode_jwt(
     data: dict[str, Any], expire_minute: int = 15, token_type: str = "access"
 ) -> str:
