@@ -32,3 +32,7 @@ class ServerError(Exception):
 
 class PermissionDeniedError(Exception):
     pass
+
+
+class DatabaseError(Exception):
+    pass
