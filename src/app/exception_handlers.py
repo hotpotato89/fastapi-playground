@@ -84,7 +84,6 @@ def register_exception_handlers(app: FastAPI) -> None:
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             content={"detail": str(exc)},
         )
-    
 
     @app.exception_handler(DatabaseError)
     async def database_error_handler(
@@ -92,7 +91,7 @@ def register_exception_handlers(app: FastAPI) -> None:
     ) -> JSONResponse:
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content={'detail': str(exc)}
+            content={"detail": str(exc)},
         )
 
     # Server errors

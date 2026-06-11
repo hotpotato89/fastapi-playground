@@ -3,6 +3,7 @@ from src.app.core import SessionLocal
 from src.app.exceptions import InvalidTokenError, UserUnactiveError
 from src.app.models import User
 from src.app.repositories import BookRepository
+from src.app.repositories.refresh_token_repository import RefreshTokenRepository
 from src.app.repositories.user_repository import UserRepository
 from src.app.services import BookService
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -34,6 +35,12 @@ async def get_user_repo(
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> UserRepository:
     return UserRepository(session)
+
+
+async def get_refresh_token_repo(
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> RefreshTokenRepository:
+    return RefreshTokenRepository(session)
 
 
 async def get_user_service(
