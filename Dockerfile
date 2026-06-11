@@ -33,4 +33,4 @@ COPY --from=builder /app/src /app/src
 #Edit env path
 ENV PATH="/app/.venv/bin:$PATH"
 
-CMD sh -c "alembic upgrade head && uvicorn src.main:app --host 0.0.0.0 --port 8000"
+CMD sh -c "alembic upgrade head && uvicorn src.app.main:app --host 0.0.0.0 --port 8000"
