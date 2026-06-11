@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[codz]
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.coverage
+.venv/
+.env
+
+# Git
+.git/
+.gitattributes
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# Docker
+.dockerignore
+
+# Твой проект
+frontend/
+*.html
+tests/
+README.md
+docker-compose*.yaml
+
+# OS
+.DS_Store
+Thumbs.db
