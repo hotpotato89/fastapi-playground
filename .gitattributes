@@ -1,0 +1,7 @@
+# .gitattributes
+frontend/**/*.html linguist-language=Ignore
+frontend/**/*.css linguist-language=Ignore
+frontend/**/*.js linguist-language=Ignore
+static/**/*.css linguist-language=Ignore
+static/**/*.js linguist-language=Ignore
+templates/**/*.html linguist-language=Ignore
