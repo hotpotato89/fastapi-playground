@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, status
 
@@ -21,9 +21,8 @@ async def register_user(
 @router.post("/login")
 async def login_user(
     service: Annotated[UserService, Depends(get_user_service)], userdata: UserLogin
-) -> dict[str, str]:
-    token = await service.login_user(userdata)
-    return {"access_token": token, "token_type": "Bearer"}
+) -> dict[str, Any]:
+    return await service.login_user(userdata)
 
 
 @router.get("/me")

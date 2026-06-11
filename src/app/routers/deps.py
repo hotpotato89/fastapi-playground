@@ -45,8 +45,9 @@ async def get_refresh_token_repo(
 
 async def get_user_service(
     repo: Annotated[UserRepository, Depends(get_user_repo)],
+    refresh_token_repo: Annotated[RefreshTokenRepository, Depends(get_refresh_token_repo)]
 ) -> UserService:
-    return UserService(repo)
+    return UserService(repo, refresh_token_repo)
 
 
 async def get_token_payload(
