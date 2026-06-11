@@ -46,7 +46,6 @@ class RefreshToken(Base):
     expires_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True), nullable=False
     )
-    revoked: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
     )
