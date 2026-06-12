@@ -62,6 +62,9 @@ async def get_current_user(
     data: Annotated[dict[str, Any], Depends(get_token_payload)],
     repo: Annotated[UserRepository, Depends(get_user_repo)],
 ) -> User:
+    if data['type'] != 'access':
+        raise InvalidTokenError('Required access token')
+
     user_id = data.get("user_id")
     if not user_id:
         raise InvalidTokenError("Token has no user_id")
