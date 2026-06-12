@@ -27,6 +27,9 @@ COPY --from=builder /app/.venv /app/.venv
 COPY --from=builder /app/alembic /app/alembic
 COPY --from=builder /app/alembic.ini /app/alembic.ini
 
+#Copy RSA keys
+COPY --from=builder /app/keys /app/keys
+
 #Copy src
 COPY --from=builder /app/src /app/src
 
