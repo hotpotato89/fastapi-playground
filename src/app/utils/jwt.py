@@ -23,12 +23,12 @@ def _encode_jwt(
     now = datetime.now(timezone.utc)
     expire = now + timedelta(minutes=expire_minute)
     to_encode.update({"exp": expire, "iat": now, "type": token_type})
-    return jwt.encode(to_encode, settings.jwt.secret_key, settings.jwt.algorithm)
+    return jwt.encode(to_encode, settings.jwt.private_key_path.read_text(), settings.jwt.algorithm)
 
 
 def decode_jwt(token: str) -> dict[str, Any]:
     try:
-        return jwt.decode(token, settings.jwt.secret_key, [settings.jwt.algorithm])
+        return jwt.decode(token, settings.jwt.public_key_path.read_text(), [settings.jwt.algorithm])
     except jwt.exceptions.DecodeError:
         raise InvalidTokenError("Invalid token")
     except jwt.exceptions.ExpiredSignatureError:
