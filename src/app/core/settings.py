@@ -17,7 +17,7 @@ class DBSettings(BaseModel):
 
 
 class JWTSettings(BaseModel):
-    algorithm: str = 'RS256'
+    algorithm: str = "RS256"
     private_key_path: Path
     public_key_path: Path
 
