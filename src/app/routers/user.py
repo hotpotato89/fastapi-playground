@@ -1,6 +1,6 @@
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Body, Depends, status
 
 from src.app.models import User
 from src.app.routers.deps import get_current_active_user, get_user_service
@@ -31,3 +31,19 @@ async def get_me(
     service: Annotated[UserService, Depends(get_user_service)],
 ) -> UserResponse:
     return await service.get_me(current_user)
+
+
+@router.post("/refresh")
+async def refresh(
+    refresh_token: Annotated[str, Body(..., embed=True)],
+    service: Annotated[UserService, Depends(get_user_service)],
+) -> dict[str, str]:
+    return await service.refresh(refresh_token)
+
+
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+async def logout(
+    refresh_token: Annotated[str, Body(..., embed=True)],
+    service: Annotated[UserService, Depends(get_user_service)],
+) -> None:
+    return await service.logout(refresh_token)

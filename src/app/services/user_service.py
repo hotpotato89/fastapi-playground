@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from typing import Any
 
-from src.app.exceptions import InvalidCredentialsError
+from src.app.exceptions import InvalidCredentialsError, InvalidTokenError
 from src.app.models import User
 from src.app.repositories.refresh_token_repository import RefreshTokenRepository
 from src.app.repositories.user_repository import UserRepository
@@ -44,3 +44,20 @@ class UserService:
 
     async def get_me(self, user: User) -> UserResponse:
         return UserResponse.model_validate(user)
+
+    async def refresh(self, refresh_token: str) -> dict[str, str]:
+        payload = decode_jwt(refresh_token)
+
+        if payload["type"] != "refresh":
+            raise InvalidTokenError("Invalid token type")
+
+        stored = await self.refresh_token_repo.get_by_token(refresh_token)
+        if not stored:
+            raise InvalidTokenError("Token not found in database")
+
+        access_token = create_access_token(payload["user_id"], payload["sub"])
+
+        return {"access_token": access_token, "token_type": "Bearer"}
+
+    async def logout(self, refresh_token: str) -> None:
+        return await self.refresh_token_repo.revoke_by_token(refresh_token)
