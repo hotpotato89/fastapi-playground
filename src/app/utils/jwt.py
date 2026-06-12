@@ -31,7 +31,10 @@ def _encode_jwt(
 def decode_jwt(token: str) -> dict[str, Any]:
     try:
         return jwt.decode(
-            token, settings.jwt.public_key_path.read_text(), [settings.jwt.algorithm]
+            token,
+            settings.jwt.public_key_path.read_text(),
+            [settings.jwt.algorithm],
+            options={"verify_signature": True},
         )
     except jwt.exceptions.DecodeError:
         raise InvalidTokenError("Invalid token")
