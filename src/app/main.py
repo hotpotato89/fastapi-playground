@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.app.exception_handlers import register_exception_handlers
-from src.app.routers import root_router
+from src.app.api.routers import root_router
 from src.app.core import lifespan, settings
 from src.app.main_router import main_router
 

@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path, Query, status
 from src.app.models import User
-from src.app.routers.deps import get_book_service, get_current_active_user
+from src.app.api.deps import get_book_service, get_current_active_user
 from src.app.schemas.book_schemas import BookCreate, BookResponse, BookUpdate
 from src.app.services.book_service import BookService
 

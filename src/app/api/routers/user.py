@@ -3,7 +3,7 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Body, Depends, status
 
 from src.app.models import User
-from src.app.routers.deps import get_current_active_user, get_user_service
+from src.app.api.deps import get_current_active_user, get_user_service
 from src.app.schemas.user_schemas import UserLogin, UserRegister, UserResponse
 from src.app.services.user_service import UserService
 
