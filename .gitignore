@@ -216,3 +216,13 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+
+# RSA keys (private key only, public can be shared)
+*.pem
+!public.pem
+private.pem
+*.key
+*.priv
+keys/
+!keys/public.pem
