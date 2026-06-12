@@ -123,6 +123,7 @@
         let currentGenre = '';
         
         function getToken() { return localStorage.getItem('access_token'); }
+        function getRefreshToken() { return localStorage.getItem('refresh_token'); }
         function isAuthenticated() { return !!getToken(); }
         
         function showToast(message, type) {
@@ -131,6 +132,71 @@
             toast.textContent = message;
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 2000);
+        }
+        
+        async function refreshAccessToken() {
+            const refresh_token = getRefreshToken();
+            if (!refresh_token) return null;
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/refresh`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refresh_token })
+                });
+                
+                if (response.status === 200) {
+                    const data = await response.json();
+                    localStorage.setItem('access_token', data.access_token);
+                    return data.access_token;
+                }
+            } catch (error) {
+                console.error('Refresh failed:', error);
+            }
+            
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            window.location.href = '/auth.html';
+            return null;
+        }
+        
+        async function fetchWithAuth(url, options = {}) {
+            let token = getToken();
+            
+            const makeRequest = async (t) => {
+                return fetch(url, {
+                    ...options,
+                    headers: {
+                        ...options.headers,
+                        'Authorization': `Bearer ${t}`
+                    }
+                });
+            };
+            
+            let response = await makeRequest(token);
+            
+            if (response.status === 401) {
+                const newToken = await refreshAccessToken();
+                if (newToken) {
+                    response = await makeRequest(newToken);
+                }
+            }
+            
+            return response;
+        }
+        
+        async function logout() {
+            const refresh_token = getRefreshToken();
+            if (refresh_token) {
+                await fetch(`${API_URL}/auth/logout`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refresh_token })
+                });
+            }
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            window.location.href = '/';
         }
         
         function updateNav() {
@@ -147,12 +213,10 @@
                 logoutBtn.classList.remove('hidden');
                 createBtn.classList.remove('hidden');
                 
-                fetch(`${API_URL}/auth/me`, {
-                    headers: { 'Authorization': `Bearer ${getToken()}` }
-                })
-                .then(res => res.json())
-                .then(data => { usernameSpan.textContent = data.username; })
-                .catch(() => {});
+                fetchWithAuth(`${API_URL}/auth/me`)
+                    .then(res => res.json())
+                    .then(data => { usernameSpan.textContent = data.username; })
+                    .catch(() => {});
             } else {
                 authLink.classList.remove('hidden');
                 profileLink.classList.add('hidden');
@@ -204,12 +268,9 @@
         
         async function createBook(data) {
             try {
-                const response = await fetch(`${API_URL}/book/`, {
+                const response = await fetchWithAuth(`${API_URL}/book/`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${getToken()}`
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
                 
@@ -229,12 +290,9 @@
         
         async function updateBook(id, data) {
             try {
-                const response = await fetch(`${API_URL}/book/${id}`, {
+                const response = await fetchWithAuth(`${API_URL}/book/${id}`, {
                     method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${getToken()}`
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
                 
@@ -253,9 +311,8 @@
         async function deleteBook(id) {
             if (!confirm('Вы уверены?')) return;
             try {
-                const response = await fetch(`${API_URL}/book/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                const response = await fetchWithAuth(`${API_URL}/book/${id}`, {
+                    method: 'DELETE'
                 });
                 
                 if (response.status === 204) {
@@ -292,19 +349,13 @@
             return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
         }
         
-        document.getElementById('logoutBtn')?.addEventListener('click', () => {
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
-            window.location.href = '/';
-        });
-        
+        document.getElementById('logoutBtn')?.addEventListener('click', () => logout());
         document.getElementById('applyFilters').addEventListener('click', () => {
             currentGenre = document.getElementById('genreFilter').value;
             currentLimit = parseInt(document.getElementById('limitFilter').value);
             currentPage = 1;
             fetchBooks();
         });
-        
         document.getElementById('prevPage').addEventListener('click', () => { if (currentPage > 1) { currentPage--; fetchBooks(); } });
         document.getElementById('nextPage').addEventListener('click', () => { currentPage++; fetchBooks(); });
         document.getElementById('createBookBtn').addEventListener('click', () => document.getElementById('bookModal').classList.add('active'));
