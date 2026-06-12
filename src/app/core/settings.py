@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings
 from pydantic import BaseModel
 
@@ -15,8 +17,9 @@ class DBSettings(BaseModel):
 
 
 class JWTSettings(BaseModel):
-    secret_key: str
-    algorithm: str = "HS256"
+    algorithm: str = 'RS256'
+    private_key_path: Path
+    public_key_path: Path
 
 
 class DeploySettings(BaseModel):
