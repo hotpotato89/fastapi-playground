@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои книги - BookLibrary</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            max-width: 500px;
+            width: 90%;
+        }
+        .header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .btn-create {
+            width: auto;
+            padding: 10px 20px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">📚 BookLibrary</a>
+            <div class="nav-links">
+                <a href="index.html">Главная</a>
+                <a href="books.html">Мои книги</a>
+                <a href="profile.html">Профиль</a>
+                <button class="btn-logout" onclick="logout()">Выйти</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header-actions">
+            <h1 style="color: white;">📖 Мои книги</h1>
+            <button class="btn btn-create" onclick="showCreateModal()">+ Создать книгу</button>
+        </div>
+        
+        <div id="myBooksList" class="books-grid">
+            <div class="loading">Загрузка...</div>
+        </div>
+    </div>
+
+    <!-- Модальное окно создания/редактирования -->
+    <div id="bookModal" class="modal">
+        <div class="modal-content form-container">
+            <h2 id="modalTitle" class="form-title">Создать книгу</h2>
+            <form id="bookForm" onsubmit="saveBook(event)">
+                <input type="hidden" id="bookId">
+                <div class="form-group">
+                    <label>Название</label>
+                    <input type="text" id="bookTitle" required maxlength="30">
+                </div>
+                <div class="form-group">
+                    <label>Жанр</label>
+                    <input type="text" id="bookGenre" required>
+                </div>
+                <div class="form-group">
+                    <label>Описание</label>
+                    <textarea id="bookDescription"></textarea>
+                </div>
+                <div class="action-buttons">
+                    <button type="submit" class="btn">Сохранить</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script>
+        let currentUserId = null;
+        
+        // Загрузка текущего пользователя
+        async function loadCurrentUser() {
+            try {
+                const response = await fetchWithAuth('/auth/me');
+                const user = await response.json();
+                currentUserId = user.id;
+                return user.id;
+            } catch (error) {
+                console.error('Ошибка загрузки пользователя:', error);
+                return null;
+            }
+        }
+        
+        async function loadMyBooks() {
+            const booksDiv = document.getElementById('myBooksList');
+            booksDiv.innerHTML = '<div class="loading">Загрузка...</div>';
+            
+            // Сначала получаем ID текущего пользователя
+            if (!currentUserId) {
+                await loadCurrentUser();
+            }
+            
+            if (!currentUserId) {
+                booksDiv.innerHTML = '<div style="color: white; text-align: center;">Ошибка авторизации</div>';
+                return;
+            }
+            
+            try {
+                // ПРАВИЛЬНЫЙ ЗАПРОС: передаём author_id фильтр в API
+                const response = await fetchWithAuth(`/book?limit=50&page=1&author_id=${currentUserId}`);
+                const myBooks = await response.json();
+                
+                if (myBooks.length === 0) {
+                    booksDiv.innerHTML = '<div style="color: white; text-align: center;">У вас пока нет книг</div>';
+                    return;
+                }
+                
+                booksDiv.innerHTML = myBooks.map(book => `
+                    <div class="book-card">
+                        <h3>${escapeHtml(book.title)}</h3>
+                        <span class="genre-badge">${escapeHtml(book.genre)}</span>
+                        <div class="description">${escapeHtml(book.description || 'Нет описания')}</div>
+                        <div class="meta">📅 ${new Date(book.created_at).toLocaleDateString('ru-RU')}</div>
+                        <div class="action-buttons" style="margin-top: 15px;">
+                            <button class="btn" style="width: auto; padding: 8px;" onclick="showEditModal(${book.id})">✏️ Редактировать</button>
+                            <button class="btn btn-danger" style="width: auto; padding: 8px;" onclick="deleteBook(${book.id})">🗑️ Удалить</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Ошибка загрузки:', error);
+                booksDiv.innerHTML = '<div style="color: white; text-align: center;">Ошибка загрузки книг</div>';
+            }
+        }
+        
+        async function saveBook(event) {
+            event.preventDefault();
+            
+            const id = document.getElementById('bookId').value;
+            const data = {
+                title: document.getElementById('bookTitle').value,
+                genre: document.getElementById('bookGenre').value,
+                description: document.getElementById('bookDescription').value
+            };
+            
+            try {
+                let response;
+                if (id) {
+                    response = await fetchWithAuth(`/book/${id}`, {
+                        method: 'PATCH',
+                        body: JSON.stringify(data)
+                    });
+                    showNotification('Книга обновлена!');
+                } else {
+                    response = await fetchWithAuth('/book/', {
+                        method: 'POST',
+                        body: JSON.stringify(data)
+                    });
+                    showNotification('Книга создана!');
+                }
+                
+                if (response.ok) {
+                    closeModal();
+                    loadMyBooks();
+                } else {
+                    const error = await response.json();
+                    showNotification(error.detail || 'Ошибка', 'error');
+                }
+            } catch (error) {
+                showNotification('Ошибка сохранения', 'error');
+            }
+        }
+        
+        async function showEditModal(id) {
+            try {
+                const response = await fetchWithAuth(`/book/${id}`);
+                const book = await response.json();
+                
+                // Проверяем, что книга принадлежит текущему пользователю
+                if (book.author_id !== currentUserId) {
+                    showNotification('Это не ваша книга!', 'error');
+                    return;
+                }
+                
+                document.getElementById('modalTitle').textContent = 'Редактировать книгу';
+                document.getElementById('bookId').value = book.id;
+                document.getElementById('bookTitle').value = book.title;
+                document.getElementById('bookGenre').value = book.genre;
+                document.getElementById('bookDescription').value = book.description || '';
+                
+                document.getElementById('bookModal').style.display = 'flex';
+            } catch (error) {
+                showNotification('Ошибка загрузки книги', 'error');
+            }
+        }
+        
+        function showCreateModal() {
+            document.getElementById('modalTitle').textContent = 'Создать книгу';
+            document.getElementById('bookId').value = '';
+            document.getElementById('bookTitle').value = '';
+            document.getElementById('bookGenre').value = '';
+            document.getElementById('bookDescription').value = '';
+            document.getElementById('bookModal').style.display = 'flex';
+        }
+        
+        async function deleteBook(id) {
+            if (confirm('Вы уверены, что хотите удалить эту книгу?')) {
+                try {
+                    const response = await fetchWithAuth(`/book/${id}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.status === 204) {
+                        showNotification('Книга удалена');
+                        loadMyBooks();
+                    } else {
+                        showNotification('Ошибка удаления', 'error');
+                    }
+                } catch (error) {
+                    showNotification('Ошибка удаления', 'error');
+                }
+            }
+        }
+        
+        function closeModal() {
+            document.getElementById('bookModal').style.display = 'none';
+        }
+        
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+        
+        window.onclick = function(event) {
+            const modal = document.getElementById('bookModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+        
+        if (checkAuth()) {
+            loadCurrentUser().then(() => {
+                loadMyBooks();
+            });
+        }
+    </script>
+</body>
+</html>

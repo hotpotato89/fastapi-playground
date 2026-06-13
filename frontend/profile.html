@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль - BookLibrary</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">📚 BookLibrary</a>
+            <div class="nav-links">
+                <a href="index.html">Главная</a>
+                <a href="books.html">Мои книги</a>
+                <a href="profile.html">Профиль</a>
+                <button class="btn-logout" onclick="logout()">Выйти</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="profileInfo" class="profile-card">
+            <div class="loading">Загрузка профиля...</div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script>
+        async function loadProfile() {
+            const profileDiv = document.getElementById('profileInfo');
+            
+            try {
+                const response = await fetchWithAuth('/auth/me');
+                const user = await response.json();
+                
+                profileDiv.innerHTML = `
+                    <div class="profile-avatar">👤</div>
+                    <h2>${escapeHtml(user.username)}</h2>
+                    <div class="profile-info">
+                        <p><strong>ID:</strong> ${user.id}</p>
+                        <p><strong>Статус:</strong> ${user.is_active ? '✅ Активен' : '❌ Неактивен'}</p>
+                        <p><strong>Дата регистрации:</strong> ${new Date(user.created_at).toLocaleDateString('ru-RU')}</p>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Ошибка загрузки профиля:', error);
+                profileDiv.innerHTML = '<div style="text-align: center; color: red;">Ошибка загрузки профиля</div>';
+            }
+        }
+        
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+        
+        if (checkAuth()) {
+            loadProfile();
+        }
+    </script>
+</body>
+</html>

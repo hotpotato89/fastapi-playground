@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная - BookLibrary</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">📚 BookLibrary</a>
+            <div class="nav-links">
+                <a href="index.html">Главная</a>
+                <a href="books.html">Мои книги</a>
+                <a href="profile.html">Профиль</a>
+                <button class="btn-logout" onclick="logout()">Выйти</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 style="color: white; margin-bottom: 20px;">Все книги</h1>
+        
+        <div class="filters" style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <input type="text" id="genreFilter" placeholder="Фильтр по жанру" style="width: 200px;">
+            <button onclick="loadBooks()" class="btn" style="width: auto; padding: 10px 20px;">Поиск</button>
+        </div>
+        
+        <div id="booksList" class="books-grid">
+            <div class="loading">Загрузка...</div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script>
+        let currentPage = 1;
+        let currentGenre = '';
+        
+        async function loadBooks() {
+            const genre = document.getElementById('genreFilter').value;
+            currentGenre = genre;
+            const booksDiv = document.getElementById('booksList');
+            
+            booksDiv.innerHTML = '<div class="loading">Загрузка...</div>';
+            
+            try {
+                let url = `/book?limit=50&page=${currentPage}`;
+                if (genre) url += `&genre=${encodeURIComponent(genre)}`;
+                
+                const response = await fetchWithAuth(url);
+                const books = await response.json();
+                
+                if (books.length === 0 && currentPage > 1) {
+                    currentPage--;
+                    loadBooks();
+                    return;
+                }
+                
+                if (books.length === 0) {
+                    booksDiv.innerHTML = '<div style="color: white; text-align: center;">Книг пока нет</div>';
+                    return;
+                }
+                
+                booksDiv.innerHTML = books.map(book => `
+                    <div class="book-card" onclick="window.location.href='books.html?id=${book.id}'">
+                        <h3>${escapeHtml(book.title)}</h3>
+                        <span class="genre-badge">${escapeHtml(book.genre)}</span>
+                        <div class="description">${escapeHtml(book.description || 'Нет описания')}</div>
+                        <div class="meta">📅 ${new Date(book.created_at).toLocaleDateString('ru-RU')}</div>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Ошибка загрузки:', error);
+                booksDiv.innerHTML = '<div style="color: white; text-align: center;">Ошибка загрузки книг</div>';
+            }
+        }
+        
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+        
+        // Поиск при нажатии Enter
+        document.getElementById('genreFilter').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                currentPage = 1;
+                loadBooks();
+            }
+        });
+        
+        if (checkAuth()) {
+            loadBooks();
+        }
+    </script>
+</body>
+</html>
