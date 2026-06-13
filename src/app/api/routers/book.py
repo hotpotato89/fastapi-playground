@@ -9,7 +9,7 @@ from src.app.services.book_service import BookService
 router = APIRouter(tags=["book"], prefix="/book")
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("", status_code=status.HTTP_201_CREATED)
 async def create_book(
     service: Annotated[BookService, Depends(get_book_service)],
     upload_data: BookCreate,
@@ -18,7 +18,7 @@ async def create_book(
     return await service.create_book(upload_data, current_user.id)
 
 
-@router.get("/")
+@router.get("")
 async def get_all(
     service: Annotated[BookService, Depends(get_book_service)],
     limit: int = Query(50, ge=1, le=50, description="Limit of count on one page"),
