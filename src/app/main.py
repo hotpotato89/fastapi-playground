@@ -5,9 +5,11 @@ from src.app.exception_handlers import register_exception_handlers
 from src.app.api.routers import root_router
 from src.app.core import lifespan, settings
 from src.app.main_router import main_router
+from src.app.middlewares import register_middlewares
 
 app = FastAPI(title="FastAPI playground", lifespan=lifespan)
 register_exception_handlers(app)
+register_middlewares(app)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.deploy.allow_origins,
