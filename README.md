@@ -115,3 +115,7 @@ docker compose down -v
 - Argon2 хэширование паролей
 - Чистая архитектура (Service → Repository)
 - Nginx reverse proxy + раздача статики
+
+# Автор
+
+[hotpotato89](https://github.com/hotpotato89)
