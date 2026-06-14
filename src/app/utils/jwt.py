@@ -11,7 +11,7 @@ PUBLIC_KEY = settings.jwt.public_key_path.read_text()
 
 def create_access_token(user_id: int, username: str) -> str:
     payload = {"sub": username, "user_id": user_id}
-    return _encode_jwt(payload, 15, 'access')
+    return _encode_jwt(payload, 15, "access")
 
 
 def create_refresh_token(user_id: int, username: str) -> str:
@@ -26,9 +26,7 @@ def _encode_jwt(
     now = datetime.now(timezone.utc)
     expire = now + timedelta(minutes=expire_minute)
     to_encode.update({"exp": expire, "iat": now, "type": token_type})
-    return jwt.encode(
-        to_encode, PRIVATE_KEY, settings.jwt.algorithm
-    )
+    return jwt.encode(to_encode, PRIVATE_KEY, settings.jwt.algorithm)
 
 
 def decode_jwt(token: str) -> dict[str, Any]:
