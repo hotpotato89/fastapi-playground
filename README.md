@@ -27,7 +27,7 @@ git clone https://github.com/hotpotato89/fastapi-playground.git
 cd fastapi-playground
 ```
 
-3 Настройка окружения:
+# Настройка окружения:
 ```bash
 cp .env.example .env
 ```
