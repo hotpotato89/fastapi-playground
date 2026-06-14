@@ -7,6 +7,7 @@
 ![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0-red)
 ![Alembic](https://img.shields.io/badge/Alembic-1.14-orange)
 ![Nginx](https://img.shields.io/badge/Nginx-1.27-green)
+![uv](https://img.shields.io/badge/uv-0.6-blue)
 
 Production-ready REST API с JWT аутентификацией, refresh токенами, Docker и Nginx.
 Имеется фронт, сгенерированный с помощью ИИ (скрыл из статистики языков для презентабельности через .gitattributes).
