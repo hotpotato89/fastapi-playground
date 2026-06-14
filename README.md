@@ -71,34 +71,42 @@ curl http://localhost/api/health
 
 ## Docker команды
 
-Запуск всех сервисов:
+# Запуск всех сервисов:
+```bash
 docker compose up -d --build
+```
 
-Просмотр логов:
+# Просмотр логов:
+```bash
 docker compose logs -f
+```
 
-Остановка:
+# Остановка:
+```bash
 docker compose down
+```
 
-Полная очистка (с удалением данных):
+# Полная очистка (с удалением данных):
+```bash
 docker compose down -v
+```
 
 ## Переменные окружения (.env)
 
-DB__NAME=playground_db
-DB__USER=postgres
-DB__PASSWORD=your_password
-DB__HOST=db
-DB__PORT=5432
+ - DB__NAME=playground_db
+ - DB__USER=postgres
+ - DB__PASSWORD=your_password
+ - DB__HOST=db
+ - DB__PORT=5432
 
-JWT__ALGORITHM=RS256
-JWT__PRIVATE_KEY_PATH=keys/private.pem
-JWT__PUBLIC_KEY_PATH=keys/public.pem
+ - JWT__ALGORITHM=RS256
+ - JWT__PRIVATE_KEY_PATH=keys/private.pem
+ - JWT__PUBLIC_KEY_PATH=keys/public.pem
 
-DEPLOY__ALLOW_ORIGINS=["http://localhost"]
-DEPLOY__ALLOW_CREDENTIALS=true
-DEPLOY__ALLOW_HEADERS=["*"]
-DEPLOY__ALLOW_METHODS=["*"]
+ - DEPLOY__ALLOW_ORIGINS=["http://localhost"]
+ - DEPLOY__ALLOW_CREDENTIALS=true
+ - DEPLOY__ALLOW_HEADERS=["*"]
+ - DEPLOY__ALLOW_METHODS=["*"]
 
 ## Особенности безопасности
 
