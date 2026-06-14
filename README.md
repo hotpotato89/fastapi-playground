@@ -29,6 +29,12 @@ git clone https://github.com/hotpotato89/fastapi-playground.git
 cd fastapi-playground
 ```
 
+## Виртуальное окружение
+```bash
+uv sync --frozen
+source .venv/bin/activate
+```
+
 ## Настройка окружения:
 ```bash
 cp .env.example .env
