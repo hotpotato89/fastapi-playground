@@ -9,6 +9,7 @@
 ![Nginx](https://img.shields.io/badge/Nginx-1.27-green)
 
 Production-ready REST API с JWT аутентификацией, refresh токенами, Docker и Nginx.
+Имеется фронт, сгенерированный с помощью ИИ (скрыл из статистики языков для презентабельности через .gitattributes).
 
 ## Технологии
 
